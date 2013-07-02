@@ -2,7 +2,6 @@ var Emitter = require('events').EventEmitter;
 var nopt    = require('nopt');
 var fs      = require('fs');
 var path    = require('path');
-var semver = require('semver');
 
 var Package = require('../util/package');
 

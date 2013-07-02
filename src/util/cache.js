@@ -1,6 +1,4 @@
 var EventEmitter = require('events').EventEmitter;
-var git = require('nodegit');
-var gitBasic = require('../../lib/git-basic');
 var fs = require('fs');
 var Repo = require('../util/repo');
 

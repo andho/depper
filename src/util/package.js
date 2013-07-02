@@ -1,4 +1,5 @@
 var EventEmitter = require('events').EventEmitter;
+var semver = require('semver');
 
 function Package(name, version, repo) {
 	this.name = name;
@@ -36,7 +37,7 @@ Package.prototype.install = function() {console.log("Fetching updates from remot
 				.on('checkout', function() {
 					console.log("Checked out " + getVersion);
 				});
-			});
+			}.bind(this));
 		} else {
 			console.log("Checking out: master");
 			this.repo.checkout(this.version)
@@ -44,7 +45,7 @@ Package.prototype.install = function() {console.log("Fetching updates from remot
 				console.log("Checkout out: master");
 			});
 		}
-	});
+	}.bind(this));
 
 	return this;
 };
