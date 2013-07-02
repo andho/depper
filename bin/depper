@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+
+var semver         = require('semver');
+var nopt           = require('nopt');
+var path           = require('path');
+var pkg            = require(path.join(__dirname, '..', 'package.json'));
+var updateNotifier = require('update-notifier');
+
+var depper    = require('../src');
+
+var command;
+var options;
+var shorthand;
+var input   = process.argv;
+var nodeVer = process.version;
+//var reqVer  = pkg.engines.node;
+var errors = [];
+var notifier = updateNotifier({ packageName: pkg.name, packageVersion: pkg.version });
+
+if (notifier.update) {
+  process.stderr.write(template('update-notice', notifier.update, true));
+}
+
+process.title = 'depper';
+
+/*if (reqVer && !semver.satisfies(nodeVer, reqVer)) {
+  throw new Error('Required: node ' + reqVer);
+}*/
+
+shorthand = { 'v': ['--version'] };
+options   = { version: Boolean };
+options   = nopt(options, shorthand, process.argv);
+
+depper.version = pkg.version;
+
+if (options.version) return console.log(depper.version);
+
+command = options.argv.remain && options.argv.remain.shift();
+command = depper.abbreviations[command];
+
+if (command) depper.command = command;
+
+
+// Temporarory fix for #22 #320 #187
+var errStatusHandler = function () {
+  process.removeListener('exit', errStatusHandler);
+  process.exit(errors.length ? 1 : 0);
+};
+process.on('exit', errStatusHandler);
+
+if (depper.command && !depper.commands[depper.command]) {
+  console.log("Invalid command: " + depper.command);
+  process.stdout.write("Invalid command: " + depper.command);
+}
+
+depper.commands[depper.command || 'help'].line(input)
+  .on('data', function (data) {
+    if (data) process.stdout.write(data);
+  })
+  .on('end', function (data) {
+    if (data) process.stdout.write(data);
+  })
+  .on('warn', function (warning)  {
+    process.stderr.write(template('warn', { message: warning }, true));
+  })
+  .on('error', function (err)  {
+    if (options.verbose) throw err;
+    process.stdout.write(template('error', { message: err.message }, true));
+    errors.push(err);
+  });
