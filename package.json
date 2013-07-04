@@ -19,6 +19,14 @@
     "hogan.js": "~2.0.0",
     "colors": "~0.6.0-1",
     "nodegit": "0.0.79",
-    "rimraf": "~2.2.0"
-  }
+    "rimraf": "~2.2.0",
+    "simply-deferred": "~2.0.0"
+  },
+  "depper": [
+    {
+      "name": "golib",
+      "source": "~/dev/projects/goingenious/golib",
+      "version": "1.0.0"
+    }
+  ]
 }

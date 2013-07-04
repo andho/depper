@@ -11,43 +11,18 @@ Package.prototype = Object.create(EventEmitter.prototype);
 Package.prototype.constructor = Package;
 
 Package.prototype.install = function() {console.log("Fetching updates from remote");
-	this.repo.fetchRemote()
-	.on('fetch', function() {
-		if (this.version !== 'master') {
-			this.repo.getVersions()
-			.on('versions', function(versions) {
-				console.log(versions);
-				var getVersion = null;
-				while ((ver = versions.shift())) {
-					if (semver.satisfies(ver, this.version)) {
-						getVersion = ver;
-						break;
-					}
-				}
-
-				if (!getVersion) {
-					console.log("Cannot find version: " + this.version);
-					return;
-				}
-
-				console.log("Found match for: " + this.version + ". Version " + getVersion + " selected");
-
-				console.log("Checking out " + getVersion);
-				this.repo.checkout(getVersion)
-				.on('checkout', function() {
-					console.log("Checked out " + getVersion);
-				});
-			}.bind(this));
-		} else {
-			console.log("Checking out: master");
-			this.repo.checkout(this.version)
-			.on('checkout', function() {
-				console.log("Checkout out: master");
-			});
-		}
-	}.bind(this));
-
+	this.repo.checkoutBestMatch(this.version)
+	.on('checkout', this.runScripts.bind(this));
 	return this;
+};
+
+Package.prototype.runScripts = function() {
+	try {
+		var config = require(this.repo.path + '/package.json');
+	} catch (e) {
+		console.log("No configuration for " + this.name);
+		return;
+	}
 };
 
 module.exports = Package;
